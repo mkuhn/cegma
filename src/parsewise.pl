@@ -213,7 +213,14 @@ if ($sequence_id){
 		print "# $sequence_id WARNING $alignment_frameshift[$max_alignment] frameshift\n";
 	}
 	#print scalar(@{$alignment_gff[$max_alignment]}) ." $alignment_score[$max_alignment]\n";
-	print @{$alignment_gff[$max_alignment]}; 
+	if (scalar(@alignment_gff) > $max_alignment)
+	{
+	    print @{$alignment_gff[$max_alignment]}; 
+	}
+	else
+	{
+	    print "# sequence_id WARNING no alignment with number $max_alignment\n";
+	}
 }
 
 exit(0);
