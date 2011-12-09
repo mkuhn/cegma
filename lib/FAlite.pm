@@ -1,54 +1,57 @@
 package FAlite;
 use strict;
+
 sub new {
-	my ($class, $fh) = @_;
-	if (ref $fh !~ /GLOB/)
-		{die ref $fh, "\n", "FAlite ERROR: expect a GLOB reference\n"}
-	my $this = bless {};
-	$this->{FH} = $fh;
-	while(<$fh>) {last if $_ =~ /\S/} # not supposed to have blanks, but...
-	my $firstline = $_;
-	if (not defined $firstline) {warn "FAlite: Empty\n"; return $this}
-	if ($firstline !~ /^>/) {warn "FAlite: Not FASTA formatted\n"; return $this}
-	$this->{LASTLINE} = $firstline;
-	chomp $this->{LASTLINE};
-	return $this;
+    my ( $class, $fh ) = @_;
+    if ( ref $fh !~ /GLOB/ )
+    { die ref $fh, "\n", "FAlite ERROR: expect a GLOB reference\n" }
+    my $this = bless {};
+    $this->{FH} = $fh;
+    while (<$fh>) { last if $_ =~ /\S/ }   # not supposed to have blanks, but...
+    my $firstline = $_;
+    if ( not defined $firstline ) { warn "FAlite: Empty\n"; return $this }
+    if ( $firstline !~ /^>/ ) { warn "FAlite: Not FASTA formatted\n"; return $this }
+    $this->{LASTLINE} = $firstline;
+    chomp $this->{LASTLINE};
+    return $this;
 }
+
 sub nextEntry {
-	my ($this) = @_;
-	return 0 if not defined $this->{LASTLINE};
-	my $fh = $this->{FH};
-	my $def = $this->{LASTLINE};
-	my @seq;
-	my $lines_read = 0;
-	while(<$fh>) {
-		$lines_read++;
-		if ($_ =~ /^>/) {
-			$this->{LASTLINE} = $_;
-			chomp $this->{LASTLINE};
-			last;
-		}
-		push @seq, $_;
-	}
-	return 0 if $lines_read == 0;
-	chomp @seq;
-	my $entry = FAlite::Entry::new($def, \@seq);
-	return $entry;
+    my ($this) = @_;
+    return 0 if not defined $this->{LASTLINE};
+    my $fh  = $this->{FH};
+    my $def = $this->{LASTLINE};
+    my @seq;
+    my $lines_read = 0;
+    while (<$fh>) {
+        $lines_read++;
+        if ( $_ =~ /^>/ ) {
+            $this->{LASTLINE} = $_;
+            chomp $this->{LASTLINE};
+            last;
+        }
+        push @seq, $_;
+    }
+    return 0 if $lines_read == 0;
+    chomp @seq;
+    my $entry = FAlite::Entry::new( $def, \@seq );
+    return $entry;
 }
 
 package FAlite::Entry;
 use overload '""' => 'all';
+
 sub new {
-	my ($def, $seqarry) = @_;
-	my $this = bless {};
-	$this->{DEF} = $def;
-	$this->{SEQ} = join("", @$seqarry);
-	$this->{SEQ} =~ s/\s//g; # just in case more spaces
-	return $this;
+    my ( $def, $seqarry ) = @_;
+    my $this = bless {};
+    $this->{DEF} = $def;
+    $this->{SEQ} = join( "", @$seqarry );
+    $this->{SEQ} =~ s/\s//g;    # just in case more spaces
+    return $this;
 }
-sub def {shift->{DEF}}
-sub seq {shift->{SEQ}}
-sub all {my $e = shift; return $e->{DEF}."\n".$e->{SEQ}."\n"}
+sub def { shift->{DEF} }
+sub seq { shift->{SEQ} }
+sub all { my $e = shift; return $e->{DEF} . "\n" . $e->{SEQ} . "\n" }
 
 1;
 
